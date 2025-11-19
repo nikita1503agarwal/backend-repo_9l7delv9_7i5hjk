@@ -11,10 +11,10 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, HttpUrl
+from typing import Optional, List
 
-# Example schemas (replace with your own):
+# Example schemas (retain for reference/testing):
 
 class User(BaseModel):
     """
@@ -38,11 +38,30 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# One Piece streaming app schemas
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Episode(BaseModel):
+    """
+    Episodes collection schema
+    Collection name: "episode"
+    """
+    number: int = Field(..., ge=1, description="Episode number")
+    season: int = Field(1, ge=1, description="Season number")
+    title: str = Field(..., description="Episode title")
+    synopsis: Optional[str] = Field(None, description="Short description of the episode")
+    thumbnail_url: Optional[HttpUrl] = Field(None, description="Thumbnail image URL")
+    poster_url: Optional[HttpUrl] = Field(None, description="Poster/banner image URL")
+    stream_url: Optional[HttpUrl] = Field(None, description="MP4/HLS URL for streaming")
+    duration_minutes: Optional[int] = Field(None, ge=1, le=240, description="Length of episode in minutes")
+    tags: List[str] = Field(default_factory=list, description="Search tags like characters, arcs")
+    is_featured: bool = Field(False, description="Show in featured carousel")
+
+class Collection(BaseModel):
+    """
+    Collections/Playlists schema
+    Collection name: "collection"
+    """
+    title: str = Field(..., description="Collection title, e.g., East Blue Saga")
+    description: Optional[str] = Field(None, description="Collection description")
+    episode_ids: List[str] = Field(default_factory=list, description="List of Episode document IDs")
+    cover_url: Optional[HttpUrl] = Field(None, description="Cover image URL")
